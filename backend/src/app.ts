@@ -7,9 +7,9 @@ import cookieParser from "cookie-parser"
 config()
 
 const app = express();
+app.use(cookieParser(process.env.COOKIE_SECRET || "default_key"))
 app.use(express.json())
 app.use(morgan('dev'))
 app.use("/api/v1/", appRouter)
-app.use(cookieParser(process.env.COOKIE_SECRET))
 
 export default app

@@ -3,6 +3,6 @@ import { connectToDb } from "./db/connection.js"
 const PORT = process.env.PORT || 5000
 connectToDb().then(()=>{
     app.listen(PORT, ()=>{
-        console.log("Server Open")
+        console.log("Server open")
     })
 }).catch(err=>console.log(err))
