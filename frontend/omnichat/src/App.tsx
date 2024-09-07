@@ -8,7 +8,8 @@ import Signup from "./pages/Signup"
 import { useAuth } from "./context/AuthContext"
 
 function App(){
-  console.log(useAuth()?.isLogged)
+  let logged = useAuth()?.isLogged
+  logged = logged
   return <main>
     <Header/>
     <Routes>
