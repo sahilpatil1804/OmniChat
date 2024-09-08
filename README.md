@@ -1,5 +1,4 @@
 # OmniChat
-## _The Last Markdown Editor, Ever_
 
 
 
@@ -19,8 +18,8 @@ Welcome to OmniChat, a chatbot application built with the MERN stack. This appli
 
 Check out a video demo of OmniChat in action: 
 
-https://github.com/user-attachments/assets/7c513e23-d7a8-4815-a23b-cad165dcc460
 
+https://github.com/user-attachments/assets/9911b2ae-9add-4e3a-bad2-37fadfd06992
 
 
 ## 🤝 Contributing
