@@ -50,3 +50,14 @@ export const userLogin = async(req:Request, res:Response)=>{
         })
     }
 }
+export const userLogout = async(req:Request, res:Response)=>{
+    try {
+        const user = await User.findById(res.locals.jwtData.id)
+        if(!user) return res.status(401).json({message:"Error"})
+        res.clearCookie(COOKIE_NAME, {
+        httpOnly:true, path:"/", signed:true})
+        return res.status(200).json({message:"Ok"})
+    } catch (error) {
+        return res.status(401).json({message:"Error", cause:error.message})
+    }
+}

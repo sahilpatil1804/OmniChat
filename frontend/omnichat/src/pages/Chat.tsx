@@ -1,25 +1,21 @@
-import React from "react";
 import { Box,Avatar, Typography, Button, IconButton } from "@mui/material";
 import { red } from "@mui/material/colors";
 import { useAuth } from "../context/AuthContext";
 import ChatItem from "../components/chat/ChatItem";
-import { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState, useLayoutEffect } from "react";
 import { IoMdSend } from "react-icons/io";
-
+import { clearChats, getChats, sendChatRequest } from "../helper/api";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
+type Messagestype = {
+    role : "user" | "bot",
+    content: string
+}
 const Chat = ()=>{
     const auth = useAuth()
-    const chats = [
-    { role: "user", content: "Who are you?" },
-    { role: "bot", content: "I am an AI assistant." },
-    { role: "user", content: "What can you do?" },
-    { role: "bot", content: "I can help you with a variety of tasks, like answering questions or providing information." },
-    { role: "user", content: "Can you tell me a joke?" },
-    { role: "bot", content: "Sure! Why don't scientists trust atoms? Because they make up everything!" },
-    { role: "user", content: "That's funny! Do you know any interesting facts?" },
-    { role: "bot", content: "Yes! Did you know that honey never spoils? Archaeologists have found pots of honey in ancient Egyptian tombs that are over 3,000 years old and still perfectly edible." },
-    { role: "user", content: "Wow, that's amazing! How can I contact support?" },
-    { role: "bot", content: "You can contact support by emailing support@example.com or visiting our support page at example.com/support." }
-]
+    const navigate = useNavigate()
+    const [messages, setMessages] = useState<Messagestype[]>([])
+    
     const chatContainerRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null)
 
@@ -27,9 +23,52 @@ const Chat = ()=>{
     if (chatContainerRef.current) {
         chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
-}, [chats]);
+}, [messages]);
+
+    useLayoutEffect(()=>{
+        if(auth?.isLogged && auth.user){
+            toast.loading("Loading Chats", {id:"loadchats"})
+            getChats().then((data)=>{
+                setMessages([...data])
+                toast.success("Chats loaded successfully", {id:"loadchats"})
+            }).catch(err=>{
+                console.log(err.message)
+                toast.error("Loading failed", {id:"loadchats"})
+            })
+        }
+    }, [auth])
+    useEffect(()=>{
+        if(!auth?.user){
+            return navigate('/')
+        }
+    }, [auth])
     const handleSubmit = async()=>{
-        console.log(inputRef.current?.value)
+        const content = inputRef.current?.value as string
+        if(inputRef && inputRef.current){
+            inputRef.current.value = ""
+        }
+        const newMessage : Messagestype = {role:"user", content}
+        setMessages((prev: Messagestype[])=>[...prev, newMessage])
+        const chatData = await sendChatRequest(content)
+        setMessages([...chatData])
+    }
+    const handleKeyDown = async(event: React.KeyboardEvent<HTMLInputElement>)=>{
+        if(event.key === 'Enter'){
+            event.preventDefault()
+            await handleSubmit()
+        }
+    }
+    const handleDeleteChat = async()=>{
+        try {
+            toast.loading("Clearing Conversation...", {id:"deletechats"})
+            await clearChats()
+            setMessages([])
+            toast.success("Cleared chats Successfully", {id:"deletechats"})
+
+        } catch (error) {
+            console.log(error)
+            toast.error("Deleting chats failed", {id:"deletechats"})
+        }
     }
 
     return <Box sx={{display:"flex", flex:1, width:'100%', height:'100%', mt:3, gap:3}}>
@@ -44,14 +83,18 @@ const Chat = ()=>{
             ":hover":{
                 bgcolor:red.A400
             }
-            }}>Clear Conversation</Button>
+            }} onClick={handleDeleteChat}>Clear Conversation</Button>
             </Box>
         </Box>
         <Box sx={{display:"flex", flex:{md:0.8, xs:1, sm: 1}, justifyContent:"center", flexDirection:"column"}}>
-            <Typography sx={{textAlign:"center", fontSize:"40px", color:"white", mb:2}}> Model - <span style={{ display: "inline", fontFamily: "monospace" }}>
-                <pre style={{ display: "inline", margin: 0, background:"gray" }}>Gemini 1.5 Flash</pre>
+            <Typography sx={{textAlign:"center", fontSize:"40px", color:"white", mb:2}}> Model - <span style={{ display: "inline", fontFamily: "monospace", background:"gray" }}>
+                Gemini 1.5 Flash
+                {/* <p style={{ display: "inline", margin: 0, background:"gray" }}>Gemini 1.5 Flash</p> */}
             </span></Typography>
-            <Box ref={chatContainerRef} sx={{width:"100%", height:"60vh", borderRadius:3, mx:"auto", display:"flex", flexDirection:"column", overflow:"scroll", overflowX:"hidden", scrollBehavior:"smooth", overflowY:"auto"}}> {chats.map((chat, idx)=>(<ChatItem content={chat.content} role={chat.role} key={idx} />) )} </Box>
+            <Box ref={chatContainerRef} sx={{width:"100%", height:"60vh", borderRadius:3, mx:"auto", display:"flex", flexDirection:"column", overflow:"scroll", overflowX:"hidden", scrollBehavior:"smooth", overflowY:"auto"}}>  
+            {
+            //@ts-ignore
+            messages.map((chat, idx)=>(<ChatItem content={chat.content} role={chat.role} key={idx} />) )} </Box>
             <Box sx={{
                     width: "93%", 
                     padding: "20px", 
@@ -64,7 +107,8 @@ const Chat = ()=>{
                     alignItem: "center",
                     justifyContent:"space-between"
                 }}>
-                    <input 
+                    <input
+                        onKeyDown={handleKeyDown}
                         ref = {inputRef}
                         type="text" 
                         style={{

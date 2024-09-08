@@ -25,3 +25,23 @@ export const generateChatCompletion = async(req:Request, res:Response, next:Next
         return res.status(404).json({message:"Something went wrong ", cause:error.message})
     }
 }
+export const sendChats = async(req:Request, res:Response, next:NextFunction)=>{
+    try{
+        const user = await User.findById(res.locals.jwtData.id)
+        if(!user) return res.status(401).json({message:"User not registered or token malfunctioned"})
+        return res.status(200).json({chats:user.chats})
+    }catch(error){
+        return res.status(500).json({message:"Something went wrong", cause:error.message})
+    }
+}
+export const clearChats = async(req:Request, res:Response, next:NextFunction)=>{
+    try {
+        const user = await User.findById(res.locals.jwtData.id)
+        if(!user) return res.status(401).json({message:"User not found or token malfunctioned"})
+        user.chats.splice(0, user.chats.length)
+        await user.save()
+        return res.status(200).json({message:"Chats cleared successfully"})
+    } catch (error) {
+        return res.status(500).json({message:"Something went wrong", cause: error.message})
+    }
+}

@@ -43,7 +43,7 @@ const NavigationLink = (prop : props)=>{
         color: isActive ? lightenColor(prop.textColor, 0.4) : hoverStyle.color,
     };
 
-    return <Link className="navlink" to={prop.to} style={{...baseStyle, ...hoverStyle, ...activeStyle}} onMouseEnter={()=>setIsHovered(true)} onMouseLeave={()=>setIsHovered(false)} onMouseDown={()=>setIsActive(true)} onMouseUp={()=>setIsActive(false)}>
+    return <Link className="navlink" to={prop.to} style={{...baseStyle, ...hoverStyle, ...activeStyle}} onMouseEnter={()=>setIsHovered(true)} onMouseLeave={()=>setIsHovered(false)} onMouseDown={()=>setIsActive(true)} onMouseUp={()=>setIsActive(false)} onClick={prop.onClick}>
         {prop.text}
     </Link>
 }

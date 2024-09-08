@@ -8,7 +8,8 @@ import Signup from "./pages/Signup"
 import { useAuth } from "./context/AuthContext"
 
 function App(){
-  let logged = useAuth()?.isLogged
+  const auth = useAuth()
+  let logged = auth?.isLogged
   logged = logged
   return <main>
     <Header/>
@@ -16,7 +17,7 @@ function App(){
       <Route path="/" element={<Home/>} />
       <Route path="/login" element={<Login/>}/>
       <Route path="/signup" element={<Signup/>}/>
-      <Route path="/chat" element={<Chat/>}/>
+      {auth?.isLogged && auth.user && (<Route path="/chat" element={<Chat/>}/>)}
       <Route path="*" element={<Notfound/>}/>
     </Routes>
   </main>

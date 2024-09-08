@@ -5,9 +5,11 @@ import { CiLogin } from "react-icons/ci";
 import React from "react";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 const Login = ()=>{
     const auth = useAuth()
+    const navigate = useNavigate()
     const handleSubmit = async(e:React.FormEvent<HTMLFormElement>)=>{
         e.preventDefault()
         const formdata = new FormData(e.currentTarget)
@@ -17,6 +19,7 @@ const Login = ()=>{
             toast.loading("Signing in!",{id:"login"})
             await auth?.login(email, password)
             toast.success("Signed in successfully!", {id:"login"})
+            navigate("/")
         }catch(error){
             console.log(error);
             toast.error("Something went wrong!", {id:"login"})
